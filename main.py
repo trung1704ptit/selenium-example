@@ -26,7 +26,10 @@ def get_data(url, categories):
         # print(element.text)
         container = element.find_elements(By.CLASS_NAME, 'asset-profile-container')[0]
         com_name = container.find_elements(By.TAG_NAME, 'h3')[0].text
+        p = container.find_elements(By.TAG_NAME, 'p')[0].text
+
         print(com_name)
+        print(p.split('\n'))
 
     finally:
         driver.quit()
