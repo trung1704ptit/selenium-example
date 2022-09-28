@@ -4,10 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
 
 CHROME_DRIVER_PATH = 'c:/WebDrivers/chromedriver.exe'
-HOMEPAGE = "http://books.toscrape.com"
+HOMEPAGE = "https://finance.yahoo.com/quote/AAPL/profile?p=AAPL"
 
 
 def get_data(url, categories):
@@ -15,35 +14,22 @@ def get_data(url, categories):
     browser_options.headless = True
 
     driver = Chrome(executable_path=CHROME_DRIVER_PATH, options=browser_options)
-    driver.get(url)
-    driver.implicitly_wait(10)
-    data = []
-    for category in categories:
-        humor = driver.find_element("xpath", f'//a[contains(text(),{category})]')
-        humor.click()
 
-        try:
-            books = WebDriverWait(driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.product_pod'))
-            )
-        except Exception as e:
-            raise e
 
-        for book in books:
-            title = book.find_element(By.CSS_SELECTOR, "h3 > a")
-            price = book.find_element(By.CSS_SELECTOR, ".price_color")
-            stock = book.find_element(By.CSS_SELECTOR, ".instock.availability")
-            data.append({
-                'title': title.get_attribute("title"),
-                'price': price.text,
-                'stock': stock.text,
-                'Category': category
-            })
 
-        driver.get(url)
+    driver.get(HOMEPAGE)
+    try:
+        element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'mrt-node-Col1-0-Profile'))
+        )
 
-    driver.quit()
-    return data
+        # print(element.text)
+        container = element.find_elements(By.CLASS_NAME, 'asset-profile-container')[0]
+        com_name = container.find_elements(By.TAG_NAME, 'h3')[0].text
+        print(com_name)
+
+    finally:
+        driver.quit()
 
 
 def export_csv(data):
@@ -54,9 +40,9 @@ def export_csv(data):
 
 
 def main():
-    data = get_data(url=HOMEPAGE, categories=["Humor", "Art"])
-    export_csv(data)
-    print('DONE')
+    get_data(url=HOMEPAGE, categories=["Humor", "Art"])
+    # export_csv(data)
+    # print('DONE')
 
 
 if __name__ == '__main__':
